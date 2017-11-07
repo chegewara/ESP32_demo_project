@@ -23,12 +23,14 @@ public:
 	// --- SERVER --- //
 	void createServer(std::string name);
 	void deleteServer();
-	JsonObject addService(std::string uuid);
+	JsonObject addService(BLEUUID uuid);
 	//void startServer();
 	//void stopServer();
 	void startAdvertising();
 	void stopAdvertising();
-	JsonObject addCharacteristic(std::string uuid, std::string service);
+	JsonObject addCharacteristic(BLEUUID uuid, BLEUUID service);
+	JsonObject addDescriptor(BLEUUID uuid, BLEUUID characteristic);
+	void setCharacteristicValue(BLEUUID uuid, std::string value);
 
 private:
 };

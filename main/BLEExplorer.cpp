@@ -17,7 +17,7 @@ static const char* LOG_TAG = "BLEExplorer";
 static bool isRunning = false;
 static BLEServer *pServer;
 static BLEServiceMap *mServices;
-//static std::map<std::string, BLERemoteCharacteristic*> *pServices;
+static BLECharacteristicMap *mCharacteristics;
 
 BLEExplorer::BLEExplorer() {
 	// TODO Auto-generated constructor stub
@@ -142,24 +142,48 @@ JsonObject BLEExplorer::enumerateCharacteristics(BLERemoteService *p, std::map<s
 void BLEExplorer::createServer(std::string name){
 	BLEDevice::init(name);
 	pServer = BLEDevice::createServer();
-	//pServer->getAdvertising()->addServiceUUID(BLEUUID((uint16_t)0x1816));
+	mCharacteristics = new BLECharacteristicMap();
 	mServices = new BLEServiceMap();
 }
 
-JsonObject BLEExplorer::addService(std::string uuid){
-	BLEService *pservice = pServer->createService(BLEUUID(uuid));
-	mServices->setByUUID(uuid, pservice);
-	pservice->start();
-	//pservice->createCharacteristic(BLEUUID((uint16_t)0x2a29), {BLECharacteristic::PROPERTY_READ})->setValue("Private name");
+JsonObject BLEExplorer::addService(BLEUUID _uuid){
 
-	return JSON::createObject();
+	BLEService *pservice = pServer->createService(_uuid.toString());
+	mServices->setByUUID(pservice->getUUID().toString(), pservice);
+	pservice->start();
+	JsonObject obj = JSON::createObject();
+	obj.setString("icon", "service");
+	obj.setString("id", pservice->getUUID().toString());
+	obj.setString("parent", "#");
+	obj.setString("text", BLEUtils::gattServiceToString(pservice->getUUID().getNative()->uuid.uuid32) + " Service: " + pservice->getUUID().toString());
+
+	return obj;
 }
 
-JsonObject BLEExplorer::addCharacteristic(std::string uuid, std::string service){
+JsonObject BLEExplorer::addCharacteristic(BLEUUID uuid, BLEUUID service){
 	BLEService *pservice = mServices->getByUUID(service);
-	pservice->createCharacteristic(BLEUUID(uuid), {BLECharacteristic::PROPERTY_READ})->setValue("Private name");
+	BLECharacteristic *charact = pservice->createCharacteristic(BLEUUID(uuid), {BLECharacteristic::PROPERTY_READ | BLECharacteristic::PROPERTY_NOTIFY});
+	mCharacteristics->setByUUID(charact->getUUID().toString(), charact);
+	pservice->start();
+	charact->setValue("Private name");
+	JsonObject obj = JSON::createObject();
+	obj.setString("icon", "characteristic");
+	obj.setString("id", charact->getUUID().toString());
+	obj.setString("parent", pservice->getUUID().toString());
+	obj.setString("text", BLEUtils::gattCharacteristicUUIDToString(uuid.getNative()->uuid.uuid32) + " Characteristic: " + charact->getUUID().toString());
+	return obj;
+}
 
-	return JSON::createObject();
+JsonObject BLEExplorer::addDescriptor(BLEUUID uuid, BLEUUID charact){
+	BLECharacteristic *pcharact = mCharacteristics->getByUUID(BLEUUID(charact));
+	BLEDescriptor descr = BLEDescriptor(uuid);
+	pcharact->addDescriptor(&descr);
+	JsonObject obj = JSON::createObject();
+	obj.setString("icon", "descriptor");
+	obj.setString("id", descr.getUUID().toString());
+	obj.setString("parent", pcharact->getUUID().toString());
+	obj.setString("text", BLEUtils::gattDescriptorUUIDToString(uuid.getNative()->uuid.uuid32) + " Descriptor: " + uuid.toString());
+	return obj;
 }
 
 void BLEExplorer::startAdvertising(){

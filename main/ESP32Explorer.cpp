@@ -447,23 +447,49 @@ static void handle_REST_BLE_SERVER_STOP_ADV(HttpRequest* pRequest, HttpResponse*
 	pResponse->sendData("stop adv");
 }
 static void handle_REST_BLE_SERVER_ADD_SERVICE(HttpRequest* pRequest, HttpResponse* pResponse) {
-	g_pBLEExplorer->addService((BLEUUID((uint16_t)0x180a)).toString());
+	JsonObject obj = JSON::createObject();
+	std::map<std::string, std::string> parts = pRequest->parseForm();
+	if(atoi(pRequest->getHeader(pRequest->HTTP_HEADER_CONTENT_LENGTH).c_str())>0){
+		BLEUUID uuid = BLEUUID::fromString(parts.at("UUID").c_str());
+		obj = g_pBLEExplorer->addService(uuid);
+	}
+
 	pResponse->addHeader("access-control-allow-origin", "*");
-	pResponse->addHeader("Content-Type", "text/plain");
-	pResponse->sendData("add service");
+	pResponse->addHeader("Content-Type", "application/json");
+	pResponse->sendData(obj.toString());
 }
 static void handle_REST_BLE_SERVER_GET_SERVICES(HttpRequest* pRequest, HttpResponse* pResponse) {
 }
 static void handle_REST_BLE_SERVER_ADD_CHARACTERISTIC(HttpRequest* pRequest, HttpResponse* pResponse) {
-	g_pBLEExplorer->addCharacteristic((BLEUUID((uint16_t)0x2a29)).toString(), (BLEUUID((uint16_t)0x180a)).toString());
+	JsonObject obj = JSON::createObject();
+	std::map<std::string, std::string> parts = pRequest->parseForm();
+	if(atoi(pRequest->getHeader(pRequest->HTTP_HEADER_CONTENT_LENGTH).c_str())>0){
+		BLEUUID uuid = BLEUUID::fromString(parts.at("UUID").c_str());
+		BLEUUID service = BLEUUID::fromString(parts.at("serviceUUID").c_str());
+		obj = g_pBLEExplorer->addCharacteristic(uuid, service);
+	}
+
 	pResponse->addHeader("access-control-allow-origin", "*");
-	pResponse->addHeader("Content-Type", "text/plain");
-	pResponse->sendData("add characteristic");
+	pResponse->addHeader("Content-Type", "application/json");
+	pResponse->sendData(obj.toString());
 }
+
 static void handle_REST_BLE_SERVER_GET_(HttpRequest* pRequest, HttpResponse* pResponse) {
 }
 static void handle_REST_BLE_SERVER_ADD_DESCRIPTOR(HttpRequest* pRequest, HttpResponse* pResponse) {
+	JsonObject obj = JSON::createObject();
+	std::map<std::string, std::string> parts = pRequest->parseForm();
+	if(atoi(pRequest->getHeader(pRequest->HTTP_HEADER_CONTENT_LENGTH).c_str())>0){
+		BLEUUID uuid = BLEUUID::fromString(parts.at("UUID").c_str());
+		BLEUUID characteristic = BLEUUID::fromString(parts.at("characteristicUUID").c_str());
+		obj = g_pBLEExplorer->addDescriptor(uuid, characteristic);
+	}
+
+	pResponse->addHeader("access-control-allow-origin", "*");
+	pResponse->addHeader("Content-Type", "application/json");
+	pResponse->sendData(obj.toString());
 }
+
 static void handle_REST_BLE_SERVER_GET_DESCRIPTOR(HttpRequest* pRequest, HttpResponse* pResponse) {
 }
 

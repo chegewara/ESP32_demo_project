@@ -544,7 +544,7 @@ static const characteristicMap_t g_characteristicsMappings[] = {
 typedef struct {
 	const char* name;
 	const char* type;
-	uint32_t    assignedNumber;
+	uint16_t    assignedNumber;
 } gattService_t;
 
 
@@ -1872,7 +1872,7 @@ std::string BLEUtils::gattServiceIdToString(esp_gatt_srvc_id_t srvcId) {
 } // gattServiceIdToString
 
 
-std::string BLEUtils::gattServiceToString(uint32_t serviceId) {
+std::string BLEUtils::gattServiceToString(uint16_t serviceId) {
 	gattService_t* p = (gattService_t *)g_gattServices;
 	while (strlen(p->name) > 0) {
 		if (p->assignedNumber == serviceId) {

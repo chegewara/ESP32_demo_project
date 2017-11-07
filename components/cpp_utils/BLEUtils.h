@@ -50,7 +50,7 @@ public:
 	static std::string gattDescriptorUUIDToString(uint32_t descriptorUUID);
 	static std::string gattServerEventTypeToString(esp_gatts_cb_event_t eventType);
 	static std::string gattServiceIdToString(esp_gatt_srvc_id_t srvcId);
-	static std::string gattServiceToString(uint32_t serviceId);
+	static std::string gattServiceToString(uint16_t serviceId);
 	static std::string gattStatusToString(esp_gatt_status_t status);
 	static std::string getMember(uint32_t memberId);
 	static void        registerByAddress(BLEAddress address, BLEClient* pDevice);
